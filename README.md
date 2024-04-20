@@ -48,5 +48,4 @@ If you would like to contribute to the project, please ensure you install the de
 
 ---
 
-<img src="./Logo/Logo_gif2-ezgif.com-video-to-gif-converter.gif" alt="My Project GIF" width="800" height="480">
-
+<img src="./assets/Logo_gif2-ezgif.com-video-to-gif-converter.gif" alt="My Project GIF" width="800" height="480">
