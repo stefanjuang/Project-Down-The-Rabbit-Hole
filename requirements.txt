@@ -6,6 +6,6 @@ xai-sdk
 tweepy
 python-dotenv
 Flask
-sentencepiece==0.1.99
-faiss-cpu==1.8.0
-sentence_transformers==0.4.0
+sentencepiece
+faiss-cpu
+sentence_transformers
