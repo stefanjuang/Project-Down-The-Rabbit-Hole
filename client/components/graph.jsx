@@ -12,7 +12,7 @@ const Graph = () => {
 
   const handleClick = useCallback(
     (node) => {
-      setSelectedNode(node);
+      setSelectedNode((prevNode) => (prevNode === node ? null : node));
     },
     [fgRef]
   );
