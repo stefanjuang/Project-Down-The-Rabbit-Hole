@@ -2,3 +2,6 @@
 /env
 config.cfg
 
+.DS_Store
+__pycache__
+

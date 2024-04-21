@@ -5,7 +5,10 @@ matplotlib
 xai-sdk
 tweepy
 python-dotenv
-Flask
 sentencepiece
 faiss-cpu
 sentence_transformers
+fastapi
+uvicorn
+requests
+

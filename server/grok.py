@@ -6,24 +6,47 @@ import xai_sdk
 from dotenv import load_dotenv
 
 # Load environment variables
-dotenv_path = join(dirname(__file__), ".env")
-load_dotenv(verbose=True, dotenv_path=dotenv_path)
-XAI_API_KEY = os.environ.get("XAI_API_KEY")
+load_dotenv(verbose=True)
 
 
-#     preamble = """\
-# This is a conversation between a human user and a highly intelligent AI. The AI's name is Grok and it makes every effort to truthfully answer a user's questions. It always responds politely but is not shy to use its vast knowledge in order to solve even the most difficult problems. The conversation begins.
-
-# Human: I want you to find the oldest person from a list of people. Each person is a tuple (name, age).
-
-# Please format your answer as a valid JSON. For eg. if the answer is (Bob, 50), your output should be.
-
-# {
-#     name: "Bob",
-#     age: 50
-# }<|separator|>
-
-# Assistant: Understood! Please provide the list of people as a list of (name, age) pairs."""
+PREAMBLE = """\
+            You will analyze the content and generate a comprehensive insights givent the topic and relevant tweets of user.
+            
+            Generate a comprehensive and informative answer solely based on topic and relevant tweets of user. Combine inputs together into a coherent answer. Do not repeat text, do not ramble or yapping. Cite search results using [$`{index}`] notation. Cite the relevant tweets to the context correctly.
+            with input
+            {
+                "user": "Elon Musk",
+                "topic": "Grok AI",
+                "tweets: [
+                    {
+                        "index": 1,
+                        "text": "In a few weeks, we will add a “Grok, analysis!” button under 𝕏 posts",
+                        "url": "https://x.com/elonmusk/status/1728591219180052652"
+                        },
+                        
+                    {
+                        "index": 2,
+                        "text": "Colon Cologne, the fragrance that takes you beyond Uranus!” – Grok",
+                        "url": "https://x.com/elonmusk/status/1751486972336492974"
+                        },
+                        {
+                        "index": 3,
+                        "text": "Grok, what’s your favorite sports team?In the coming weeks, Grok will summarize these mammoth laws before they are passed by Congress, so you know what their real purpose is",
+                        "url": "https://x.com/elonmusk/status/1763433242047189232"
+                        },
+                ]
+            }
+            example output is to generate summary text of the insights. index in tweets is link with [$`{index}`] in summary
+            "This feature aligns with the original meaning of 'grok' from Robert Heinlein's science fiction, which implies a profound, almost empathetic understanding of a subject. 
+            Elon Musk's introduction of the 'Grok AI' via his tweets represents an intriguing advancement in how we interact with information and process understanding. 
+            The concept of 'Grok, analysis!' being implemented as a feature on X (formerly Twitter) suggests that this AI tool is designed to provide deep, intuitive insights into the content posted on the platform. [1]
+            The mention of 'Colon Cologne' in a humorous tweet also indicates Musk's typical blend of humor with serious technological innovations, perhaps suggesting that Grok AI could have broader applications in generating engaging and creative content that goes 'beyond' conventional boundaries. 
+            More substantively, Musk's tweet about Grok AI summarizing upcoming legislation before it passes indicates a practical application aimed at transparency and public understanding of complex governmental processes. This use case highlights Grok AI's potential role in democratizing information and making intricate details more accessible to the general public. [3]
+            Overall, Grok AI seems to be positioned as a tool that not only deepens understanding but does so in a way that is approachable and engaging for users. It promises to enhance user interaction with digital content by providing deeper insights and simplifying complex information, thereby enriching the user's experience and knowledge base."
+            <|separator|>
+                
+                Assistant: Understood! Please provide the json input.
+            """
 
 
 class GrokClient:
@@ -31,18 +54,36 @@ class GrokClient:
         self.client = xai_sdk.Client()
         self.sampler = self.client.sampler
 
-    async def get_insights(self, topic_name, text):
-        PREAMBLE = f"""\
-            This is a summary and analysis of the topic '{topic_name}' based on relevant tweets. Grok will analyze the content and generate a comprehensive view on the subject matter.
-            
-            Generate a comprehensive and informative answer solely based on topic and relevant tweets of {"Elon Musk"}. Combine inputs together into a coherent answer. Do not repeat text. Cite search results using [$`{number}] notation. Only cite the most relevant results that answer the question accurately. If different results refer to different entities with the same name, write separate answers for each entity. [2][3][4][5]
-            """
+    async def fetch_tweets(self, topic_name):
+        tweets = [
+            {
+                "index": 1,
+                "text": "Tesla will never make a concept car that doesn’t become reality",
+                "url": "https://x.com/elonmusk/status/1759255283040235546",
+            },
+            {
+                "index": 2,
+                "text": "Unfortunately, very heavy Tesla obligations require that the visit to India be delayed, but I do very much look forward to visiting later this year.",
+                "url": "https://x.com/elonmusk/status/1781541775183610310",
+            },
+            {
+                "index": 3,
+                "text": "Tesla Cybertruck, the finest in apocalypse defense technology!",
+                "url": "https://x.com/elonmusk/status/1761962177794306542",
+            },
+        ]
+
+        return tweets
+
+    async def get_insights(self, user, topic_name, tweets):
+        input_json = {"user": user, "topic": topic_name, "tweets": tweets}
 
         prompt = (
             PREAMBLE
-            + f"<|separator|>\n\nHuman: {text}<|separator|>\n\nAssistant: "
-            + "{\n"
+            + f"<|separator|>\n\nHuman: {input_json}<|separator|>\n\nAssistant: "
         )
+
+        print("prompt", prompt)
 
         insights = ""
         async for token in self.sampler.sample(
@@ -52,15 +93,33 @@ class GrokClient:
             temperature=0.5,
             nucleus_p=0.95,
         ):
+            print(token.token_str)
             insights += token.token_str
-        return insights
+            yield token.token_str
+        # print(insights)
 
 
 async def main():
-    grok_client = GrokClient(api_key=XAI_API_KEY)
-    text = input("Write a message: ")
-    insights = await grok_client.get_insights("topic_name", text)
-    print(insights)
+    grok_client = GrokClient()
+    insights = await grok_client.get_insights(
+        "Elon Musk",
+        "Tesla",
+        [
+            {
+                "text": "Tesla will never make a concept car that doesn’t become reality",
+                "url": "https://x.com/elonmusk/status/1759255283040235546",
+            },
+            {
+                "text": "Unfortunately, very heavy Tesla obligations require that the visit to India be delayed, but I do very much look forward to visiting later this year.",
+                "url": "https://x.com/elonmusk/status/1781541775183610310",
+            },
+            {
+                "text": "Tesla Cybertruck, the finest in apocalypse defense technology!",
+                "url": "https://x.com/elonmusk/status/1761962177794306542",
+            },
+        ],
+    )
+    print("insights", insights)
 
 
 if __name__ == "__main__":
