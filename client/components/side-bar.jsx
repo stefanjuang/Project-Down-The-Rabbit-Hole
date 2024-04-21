@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { Tweet } from "react-tweet";
+import { Badge } from "./ui/badge";
 
 async function fetchTweets(topic) {
   const response = await fetch(
@@ -22,9 +24,6 @@ async function fetchTweets(topic) {
 const Sidebar = ({ node }) => {
   const [tweets, setTweets] = useState([]);
   const [responseText, setResponseText] = useState("");
-  //   const { complete } = useCompletion({
-  //     api: "http://127.0.0.1:8000/analyze_topic",
-  //   });
 
   useEffect(() => {
     if (node) {
@@ -54,64 +53,68 @@ const Sidebar = ({ node }) => {
       }
 
       const reader = response.body.getReader();
-      let chunks = "";
 
-      const readChunk = async ({ done, value }) => {
-        if (done) {
-          console.log("Stream finished.");
-          return;
+      // Function to handle the stream processing
+      const processStream = async () => {
+        let chunks = "";
+        let receivedLength = 0; // to count binary data length
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            console.log("Stream finished.");
+            break;
+          }
+          chunks += new TextDecoder().decode(value);
+          receivedLength += value.length;
+
+          // For example, you could update the state every N bytes
+          if (receivedLength > 64) {
+            // Arbitrary threshold
+            setResponseText((prevText) => prevText + chunks);
+            chunks = "";
+            receivedLength = 0;
+          }
         }
 
-        const strVal = new TextDecoder().decode(value);
-        chunks += strVal;
-        // Update the state with the new chunk appended
-        setResponseText((prevText) => prevText + strVal);
-
-        // Read the next chunk
-        return reader.read().then(readChunk);
+        // Ensure any remaining data is set
+        if (chunks.length > 0) {
+          setResponseText((prevText) => prevText + chunks);
+        }
       };
 
-      reader
-        .read()
-        .then(readChunk)
-        .catch((error) => {
-          console.error("Error reading the stream", error);
-        });
+      processStream().catch((error) => {
+        console.error("Error reading the stream", error);
+      });
     };
 
     fetchData();
   }, [node]);
 
-  //   useEffect(() => {
-  //     const fetchInsights = async () => {
-  //       try {
-  //         const insightsResult = complete("", {
-  //           body: {
-  //             user: "Elon Musk",
-  //             topic: node.id,
-  //           },
-  //         });
-  //         console.log(insightsResult);
-  //       } catch (error) {
-  //         console.error("Failed to fetch insights:", error);
-  //       }
-  //     };
-  //     fetchInsights();
-  //   }, [tweets, node.id]);
-
   const renderInsightWithLinks = (insight) => {
-    const regex = /\[\$(\d+)\]/g; // Matches [$`index`]
+    const regex = /\[(\d+)\]/g;
+    const parts = insight.split(regex);
+
     return (
-      <p
-        dangerouslySetInnerHTML={{
-          __html: insight.summary.replace(regex, (match, index) => {
-            const tweet = tweets.find((t) => t.index === parseInt(index));
-            return tweet
-              ? `<a href="${tweet.url}" target="_blank" rel="noopener noreferrer">${match}</a>`
-              : match;
-          }),
-        }}
-      />
+      <p>
+        {parts.map((part, index) => {
+          if (index % 2 === 0) {
+            // Render Markdown for non-link parts
+            return part;
+          } else {
+            const tweetIndex = parseInt(part, 10);
+            const tweet = tweets.find((t) => t.index === tweetIndex);
+            if (tweet) {
+              return (
+                <a href={tweet.url} target="_blank" rel="noopener noreferrer">
+                  <Badge variant="secondary">{tweetIndex}</Badge>
+                </a>
+              );
+            } else {
+              return `[${part}]`;
+            }
+          }
+        })}
+      </p>
     );
   };
 
@@ -129,19 +132,21 @@ const Sidebar = ({ node }) => {
       <h2>Node Details</h2>
       <p>ID: {node.id}</p>
       <p>Group: {node.group}</p>
-      <div style={{ display: "flex", overflowX: "auto" }}>
-        {tweets.map((tweet) => (
-          <div key={tweet.index} style={{ marginRight: "20px" }}>
-            <p>{tweet.text}</p>
-          </div>
-        ))}
+      <div className="flex overflow-x-auto gap-4">
+        {tweets.map((tweet) => {
+          const tweetId = tweet.url.split("/").pop(); // Extracts the ID from the URL
+          return (
+            <div
+              className="flex flex-col items-center w-128 h-128 shadow-md rounded-lg"
+              key={tweet.index}
+            >
+              <Badge variant="secondary">{tweet.index}</Badge>
+              <Tweet id={tweetId} />
+            </div>
+          );
+        })}
       </div>
-      <div>
-        {responseText}
-        {/* {insights.map((insight, index) => (
-          <div key={index}>{renderInsightWithLinks(insight)}</div>
-        ))} */}
-      </div>
+      <div>{renderInsightWithLinks(responseText)}</div>
     </div>
   );
 };

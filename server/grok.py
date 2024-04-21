@@ -36,13 +36,12 @@ PREAMBLE = """\
                         },
                 ]
             }
-            example output is to generate summary text of the insights. index in tweets is link with [$`{index}`] in summary
-            "This feature aligns with the original meaning of 'grok' from Robert Heinlein's science fiction, which implies a profound, almost empathetic understanding of a subject. 
-            Elon Musk's introduction of the 'Grok AI' via his tweets represents an intriguing advancement in how we interact with information and process understanding. 
-            The concept of 'Grok, analysis!' being implemented as a feature on X (formerly Twitter) suggests that this AI tool is designed to provide deep, intuitive insights into the content posted on the platform. [1]
-            The mention of 'Colon Cologne' in a humorous tweet also indicates Musk's typical blend of humor with serious technological innovations, perhaps suggesting that Grok AI could have broader applications in generating engaging and creative content that goes 'beyond' conventional boundaries. 
-            More substantively, Musk's tweet about Grok AI summarizing upcoming legislation before it passes indicates a practical application aimed at transparency and public understanding of complex governmental processes. This use case highlights Grok AI's potential role in democratizing information and making intricate details more accessible to the general public. [3]
-            Overall, Grok AI seems to be positioned as a tool that not only deepens understanding but does so in a way that is approachable and engaging for users. It promises to enhance user interaction with digital content by providing deeper insights and simplifying complex information, thereby enriching the user's experience and knowledge base."
+            example output is to generate summary text of the insights with markdown format, show bullet points and respond concisely. index in tweets is link with [$`{index}`] in summary
+            "Elon Musk's tweets about 'Grok AI' on X (formerly Twitter) unveil an innovative AI tool aimed at enhancing user interaction with online content. 
+            - In his first tweet, Musk introduces the forthcoming 'Grok, analysis!' button, set to provide deep, intuitive insights into posts on the platform. This feature embodies the essence of 'grokking'—a term from Heinlein's science fiction, implying a profound, comprehensive understanding of a subject [1]
+            - The second tweet introduces 'Colon Cologne,' a whimsical, fictional product from Grok, illustrating the AI's potential in generating creative and engaging content. This tweet reflects Musk's approach to integrating serious tech advancements with humor, potentially broadening Grok AI's appeal and application beyond conventional uses [2]
+            - The third tweet reveals a more serious application of Grok AI, discussing its future role in summarizing complex legislation before its passage by Congress. This indicates Grok AI's utility in making intricate governmental processes transparent and understandable for the general public, thereby fostering informed citizenship [3]
+            Overall, Musk's tweets showcase Grok AI as a versatile tool that promises to deepen user understanding, democratize information, and inject humor into digital interactions, redefining how users engage with content and comprehend complex topics."
             <|separator|>
                 
                 Assistant: Understood! Please provide the json input.
@@ -96,7 +95,6 @@ class GrokClient:
             print(token.token_str)
             insights += token.token_str
             yield token.token_str
-        # print(insights)
 
 
 async def main():
