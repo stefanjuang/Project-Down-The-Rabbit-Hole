@@ -19,6 +19,31 @@
 from sklearn.cluster import KMeans
 import numpy as np
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, T5Tokenizer, T5ForConditionalGeneration
+from nltk.corpus import wordnet
+import nltk
+# Download WordNet data
+nltk.download('words')
+
+# Function to remove @mentions
+def remove_mentions(tweet):
+    # Regex to find mentions and handle spaces and punctuation
+    cleaned_tweet = re.sub(r'\s*@\w+\s*', ' ', tweet)
+    # Remove additional spaces created by replacements
+    cleaned_tweet = re.sub(r'\s+', ' ', cleaned_tweet).strip()
+    return cleaned_tweet
+    
+def is_word_in_wordnet(word):
+    """ Check if a word is in WordNet """
+    return bool(wordnet.synsets(word))
+
+def filter_using_wordnet(tweets):
+    filtered_tweets = []
+    for tweet in tweets:
+        words_in_tweet = tweet.split()
+        valid_words = [word for word in words_in_tweet if is_word_in_wordnet(word)]
+        if valid_words:
+            filtered_tweets.append(' '.join(valid_words))
+    return filtered_tweets
 
 def find_closest_points(data, centroids):
     closest_indices = []
@@ -65,13 +90,15 @@ def analyze_tweet_vectors(tweet_vectors, tweets_list):
 
     closest_indices = find_closest_points(tweet_vectors, centroids)
     closest_tweets = [tweets_list[i] for i in closest_indices]
-
-    summaries = summarize_texts(closest_tweets)
+    cleaned_tweets = [remove_mentions(tweet) for tweet in closest_tweets]
+    summaries = summarize_texts(cleaned_tweets)
     topics = extract_topics(summaries)
 
     # Clean and deduplicate topics before returning
     cleaned_topics = [clean_and_deduplicate(topic) for topic in topics]
-    return cleaned_topics
+    # Filter using WordNet
+    filtered_tweets_wordnet = filter_using_wordnet(cleaned_topics)
+    return filtered_tweets_wordnet
 
 # Example usage:
 # Assuming 'tweet_vectors' and 'tweets_list_new' are provided
