@@ -1,26 +1,44 @@
 "use client";
 
+import React, { useState } from 'react';
+import axios from 'axios';
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import { useState } from "react";
 
-const SearchInput = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+const SearchComponent = ({ onSearch }) => {
+  const [query, setQuery] = useState('');
 
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
+  const handleInputChange = (e) => {
+    setQuery(e.target.value);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log('Submitting query:', query);
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/searchUsrTweets', {query});
+
+      const data = response.data;
+      console.log('Response data:', data);
+    } catch (error) {
+      console.error('Error:', error);
+    }
   };
 
   return (
-    <div className="relative flex-1 md:grow-0">
-      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+    <form onSubmit={handleSubmit} className="flex items-center bg-gray-200 p-2 rounded-lg">
       <Input
-        type="search"
-        placeholder="Search..."
-        className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+        type="text"
+        value={query}
+        onChange={handleInputChange}
+        placeholder="Enter something..."
+        className="flex-1 mr-2"
       />
-    </div>
+      <button type="submit" className="text-gray-500 hover:text-gray-700">
+        <Search size={20} />
+      </button>
+    </form>
   );
 };
 
-export default SearchInput;
+export default SearchComponent;
