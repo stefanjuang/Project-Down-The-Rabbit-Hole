@@ -2,6 +2,7 @@
 
 import asyncio
 import os
+import sys
 from os.path import dirname, join
 
 import xai_sdk
@@ -17,11 +18,23 @@ async def main():
     """Runs the example."""
     client = xai_sdk.Client()
 
-    prompt = "The answer to live and the universe is"
-    print(prompt, end="")
-    async for token in client.sampler.sample(prompt, max_len=3):
-        print(token.token_str, end="")
-    print("")
+    conversation = client.chat.create_conversation()
+
+    print("Enter an empty message to quit.\n")
+
+    while True:
+        user_input = input("Human: ")
+        print("")
+
+        if not user_input:
+            return
+
+        token_stream, _ = conversation.add_response(user_input)
+        print("Grok: ", end="")
+        async for token in token_stream:
+            print(token, end="")
+            sys.stdout.flush()
+        print("\n")
 
 
 asyncio.run(main())

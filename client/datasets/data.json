@@ -1,0 +1,137 @@
+{
+    "nodes": [
+        {
+            "id": "gun rights",
+            "group": 1
+        },
+        {
+            "id": "universal basic income",
+            "group": 1
+        },
+        {
+            "id": "freedom of speech",
+            "group": 1
+        },
+        {
+            "id": "tax on carbon emissions",
+            "group": 1
+        },
+        {
+            "id": "technology",
+            "group": 2
+        },
+        {
+            "id": "Starship",
+            "group": 2
+        },
+        {
+            "id": "Tesla",
+            "group": 2
+        },
+        {
+            "id": "AI",
+            "group": 2
+        },
+        {
+            "id": "LLM",
+            "group": 2
+        },
+        {
+            "id": "Rocket",
+            "group": 2
+        },
+        {
+            "id": "philosophy",
+            "group": 3
+        },
+        {
+            "id": "books recommendation",
+            "group": 3
+        },
+        {
+            "id": "corporations",
+            "group": 3
+        },
+        {
+            "id": "roman empire",
+            "group": 3
+        }
+    ],
+    "links": [
+        {
+            "source": "freedom of speech",
+            "target": "tax on carbon emissions",
+            "value": 5
+        },
+        {
+            "source": "freedom of speech",
+            "target": "tax on carbon emissions",
+            "value": 5
+        },
+        {
+            "source": "gun rights",
+            "target": "universal basic income",
+            "value": 7
+        },
+        {
+            "source": "gun rights",
+            "target": "freedom of speech",
+            "value": 7
+        },
+        {
+            "source": "Tesla",
+            "target": "AI",
+            "value": 8
+        },
+        {
+            "source": "technology",
+            "target": "AI",
+            "value": 8
+        },
+        {
+            "source": "technology",
+            "target": "Starship",
+            "value": 8
+        },
+        {
+            "source": "technology",
+            "target": "LLM",
+            "value": 8
+        },
+        {
+            "source": "LLM",
+            "target": "Rocket",
+            "value": 6
+        },
+        {
+            "source": "technology",
+            "target": "books recommendation",
+            "value": 4
+        },
+        {
+            "source": "philosophy",
+            "target": "books recommendation",
+            "value": 4
+        },
+        {
+            "source": "philosophy",
+            "target": "freedom of speech",
+            "value": 4
+        },
+        {
+            "source": "corporations",
+            "target": "roman empire",
+            "value": 9
+        },
+        {
+            "source": "philosophy",
+            "target": "corporations",
+            "value": 9
+        },
+        {
+            "source": "philosophy",
+            "target": "roman empire",
+            "value": 9
+        }
+    ]
+}
