@@ -1,29 +1,26 @@
 
 # package version faiss-cpu==1.8.0
-
 import numpy as np
 import faiss
+import os
 
-def search_vectors(vectors, query_vector, top_k=1000):
+def create_index(vectors, save_path="vector.index"):
     """
-    Searches for the top K nearest neighbors of a given query vector within a database of vectors using FAISS.
-    
+    Creates a FAISS index from a given set of vectors and saves the index to disk.
+
     Args:
     vectors (numpy.ndarray): A numpy array of shape (nb, d) where 'nb' is the number of base vectors and 'd' is the dimension.
-    query_vector (numpy.ndarray): A numpy array of shape (nq, d) where 'nq' is the number of query vectors (usually 1).
-    top_k (int): The number of nearest neighbors to retrieve.
+    save_path (str): Path where the index will be saved.
 
     Returns:
-    tuple: A tuple of two arrays, distances (numpy.ndarray) and indices (numpy.ndarray), representing the nearest neighbors.
+    faiss.IndexIVFPQ: The created FAISS index.
     """
-    d = 1024  # dimension of the vectors
+    d = vectors.shape[1]  # dimension of the vectors
     nb = vectors.shape[0]  # number of vectors in the base
-    
+
     # Use a HNSW index as the quantizer
     quantizer = faiss.IndexHNSWFlat(d, 32)
-
-    # number of Voronoi cells (clusters)
-    nlist = min(100, nb)  # use a smaller number of clusters if there aren't many vectors
+    nlist = min(100, nb)  # number of Voronoi cells (clusters)
     m = 64  # number of bytes per vector; adjusted to be a factor of 1024
 
     # Create an IVFPQ index
@@ -31,14 +28,7 @@ def search_vectors(vectors, query_vector, top_k=1000):
     index.train(vectors)
     index.add(vectors)
 
-    # Search the index for the top K nearest neighbors
-    distances, indices = index.search(query_vector, top_k)
+    # Save the index
+    faiss.write_index(index, save_path)
 
-    return distances, indices
-
-# Example usage of the function:
-# vectors = np.random.random((10000, 1024)).astype('float32')  # Random base vectors
-# query_vector = np.random.random((1, 1024)).astype('float32')  # Random query vector
-# distances, indices = search_vectors(vectors, query_vector, top_k=1000)
-# print("Indices of Nearest Neighbors:", indices)
-# print("Distances of Nearest Neighbors:", distances)
+    return index
